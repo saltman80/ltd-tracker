@@ -57,8 +57,8 @@
 
       function loadPreferences() {
         google.script.run
-          .withSuccessCallback(renderPrefs)
-          .withFailureCallback(handleLoadError)
+          .withSuccessHandler(renderPrefs)
+          .withFailureHandler(handleLoadError)
           .doGetPreferences();
       }
 
@@ -98,8 +98,8 @@
         saveBtn.disabled = true;
 
         google.script.run
-          .withSuccessCallback(closeSidebar)
-          .withFailureCallback(function(error) {
+          .withSuccessHandler(closeSidebar)
+          .withFailureHandler(function(error) {
             showError('Failed to save preferences: ' + (error.message || error));
             saveBtn.disabled = false;
           })
