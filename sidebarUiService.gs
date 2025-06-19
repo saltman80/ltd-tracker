@@ -3,6 +3,10 @@ function openSidebar() {
   var template = HtmlService.createTemplateFromFile('darkModeSidebarManager');
   var html = template.evaluate().setTitle('LTD Lifeline');
   SpreadsheetApp.getUi().showSidebar(html);
+  // Ensure the Deals sheet is activated when the sidebar loads
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dealsSheet = ss.getSheetByName(APP_CONFIG.SHEET_NAME);
+  if (dealsSheet) dealsSheet.activate();
 }
 
 function openSettingsSidebar() {
