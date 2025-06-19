@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Roboto, Arial, sans-serif; margin: 0; padding: 16px; color: #202124; background-color: #fff; }
+      h1 { font-size: 1.4em; margin-bottom: 16px; }
+      .field { margin-bottom: 12px; }
+      .field label { display: block; font-weight: 500; margin-bottom: 4px; }
+      .field input[type="text"], .field input[type="number"], .field select, .field textarea {
+        width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #dadce0; border-radius: 4px;
+      }
+      .field input[type="checkbox"] { margin-right: 6px; }
+      #error { color: #d93025; min-height: 1.2em; margin-bottom: 12px; }
+      .buttons { margin-top: 24px; text-align: right; }
+      .buttons button { margin-left: 8px; padding: 8px 16px; font-size: 0.9em; border: none; border-radius: 4px; cursor: pointer; }
+      .buttons .save { background-color: #1a73e8; color: #fff; }
+      .buttons .cancel { background-color: #e8eaed; color: #202124; }
+    </style>
+  </head>
+  <body>
+    <h1>Preferences</h1>
+    <div class="field">
+      <label><input type="checkbox" id="darkMode"> Enable dark mode</label>
+    </div>
+    <div class="field">
+      <label><input type="checkbox" id="emailAlerts"> Enable email alerts</label>
+    </div>
+    <div class="field">
+      <label for="alertThreshold">Alert threshold (days before expiration)</label>
+      <input type="number" id="alertThreshold" min="1">
+    </div>
+    <div class="field">
+      <label for="defaultFilter">Default list filter</label>
+      <select id="defaultFilter">
+        <option value="all">All deals</option>
+        <option value="active">Active</option>
+        <option value="refund">Refund-eligible</option>
+        <option value="expired">Expired</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="overrideDomains">Override domains (one per line)</label>
+      <textarea id="overrideDomains" rows="4" placeholder="example.com"></textarea>
+    </div>
+    <div id="error"></div>
+    <div class="buttons">
+      <button class="cancel" id="cancelBtn">Cancel</button>
+      <button class="save" id="saveBtn">Save</button>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('cancelBtn').addEventListener('click', closeSidebar);
+        document.getElementById('saveBtn').addEventListener('click', savePreferences);
+        loadPreferences();
+      });
+
+      function loadPreferences() {
+        google.script.run
+          .withSuccessCallback(renderPrefs)
+          .withFailureCallback(handleLoadError)
+          .doGetPreferences();
+      }
+
+      function handleLoadError(error) {
+        showError('Failed to load preferences: ' + (error.message || error));
+      }
+
+      function renderPrefs(prefs) {
+        clearError();
+        document.getElementById('darkMode').checked = !!prefs.darkMode;
+        document.getElementById('emailAlerts').checked = !!prefs.emailAlerts;
+        document.getElementById('alertThreshold').value = prefs.alertThreshold || '';
+        document.getElementById('defaultFilter').value = prefs.defaultFilter || 'all';
+        document.getElementById('overrideDomains').value = (prefs.overrideDomains || []).join('\n');
+      }
+
+      function savePreferences() {
+        clearError();
+        const thresholdInput = document.getElementById('alertThreshold');
+        const thresholdValue = parseInt(thresholdInput.value, 10);
+        if (isNaN(thresholdValue) || thresholdValue < 1) {
+          showError('Alert threshold must be a number at least 1');
+          thresholdInput.focus();
+          return;
+        }
+
+        const prefs = {
+          darkMode: document.getElementById('darkMode').checked,
+          emailAlerts: document.getElementById('emailAlerts').checked,
+          alertThreshold: thresholdValue,
+          defaultFilter: document.getElementById('defaultFilter').value,
+          overrideDomains: document.getElementById('overrideDomains').value
+            .split('\n').map(s => s.trim()).filter(s => s)
+        };
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+
+        google.script.run
+          .withSuccessCallback(closeSidebar)
+          .withFailureCallback(function(error) {
+            showError('Failed to save preferences: ' + (error.message || error));
+            saveBtn.disabled = false;
+          })
+          .doSetPreference(prefs);
+      }
+
+      function closeSidebar() {
+        google.script.host.close();
+      }
+
+      function showError(message) {
+        document.getElementById('error').textContent = message;
+      }
+
+      function clearError() {
+        document.getElementById('error').textContent = '';
+      }
+    </script>
+  </body>
+</html>
