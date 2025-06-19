@@ -26,3 +26,12 @@ function include(filename) {
   }
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
+
+function getDealsData() {
+  try {
+    return sheetReadWriteFormatter.getSheetData();
+  } catch (err) {
+    console.error('getDealsData error:', err);
+    throw err;
+  }
+}
