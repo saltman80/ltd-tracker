@@ -64,10 +64,3 @@ function logDateDifferencesInRange() {
     }
   }
 }
-
-function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('LTD Tracker')
-    .addItem('Log Date Differences', 'logDateDifferencesInRange')
-    .addToUi();
-}

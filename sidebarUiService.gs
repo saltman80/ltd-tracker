@@ -1,13 +1,3 @@
-function onOpen(e) {
-  SpreadsheetApp.getUi()
-    .createMenu('LTD Tracker')
-    .addItem('Open LTD Lifeline Sidebar', 'openSidebar')
-    .addToUi();
-}
-
-function onInstall(e) {
-  onOpen(e);
-}
 
 function openSidebar() {
   var template = HtmlService.createTemplateFromFile('Sidebar');
