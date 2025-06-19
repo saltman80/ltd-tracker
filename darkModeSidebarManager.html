@@ -1,0 +1,191 @@
+<!-- This file includes embedded JS/CSS due to project type rules -->
+<script>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LTD Lifeline Sidebar</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      background: #222;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      padding: 10px;
+      margin: 0;
+    }
+    .button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+    }
+    .button:hover {
+      background: #444;
+    }
+    #status {
+      margin-top: 12px;
+      padding: 8px;
+      background: #111;
+      color: #0f0;
+      font-size: 13px;
+      min-height: 20px;
+      border-radius: 4px;
+      word-wrap: break-word;
+    }
+    /* Modal styles */
+    #modalOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #modalDialog {
+      background: #333;
+      color: #eee;
+      padding: 20px;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 300px;
+      box-shadow: 0 0 10px #000;
+    }
+    #modalDialog h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    #modalDialog label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    #modalDialog input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      background: #222;
+      color: #eee;
+      border: 1px solid #555;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    #modalDialog .modal-button {
+      width: 48%;
+      padding: 10px;
+      margin: 0 1%;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #modalDialog .modal-button:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <button type="button" class="button" id="checkUrls">? Check URLs</button>
+  <button type="button" class="button" id="checkRefunds">? Check Refund Window</button>
+  <button type="button" class="button" id="filterAtRisk">?? Filter At-Risk Deals</button>
+  <button type="button" class="button" id="manualOverride">?? Manual Override</button>
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <div id="modalOverlay">
+    <div id="modalDialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Manual Override</h2>
+      <label for="overrideRowInput">Enter row number to mark reviewed:</label>
+      <input type="number" id="overrideRowInput" min="2" placeholder="Row number">
+      <div style="text-align: right;">
+        <button type="button" class="modal-button" id="modalCancel">Cancel</button>
+        <button type="button" class="modal-button" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showStatus(message, isError) {
+      const s = document.getElementById('status');
+      s.textContent = message;
+      s.style.color = isError ? '#f55' : '#0f0';
+    }
+
+    document.getElementById('checkUrls').addEventListener('click', () => {
+      showStatus('Checking URLs...');
+      google.script.run
+        .withSuccessHandler(res => showStatus(res || 'URLs check complete'))
+        .withFailureHandler(err => showStatus('Error: ' + (err.message || err), true))
+        .checkAllUrls();
+    });
+
+    document.getElementById('checkRefunds').addEventListener('click', () => {
+      showStatus('Checking refund windows...');
+      google.script.run
+        .withSuccessHandler(res => showStatus(res || 'Refund window check complete'))
+        .withFailureHandler(err => showStatus('Error: ' + (err.message || err), true))
+        .checkRefundWindow();
+    });
+
+    document.getElementById('filterAtRisk').addEventListener('click', () => {
+      showStatus('Filtering at-risk deals...');
+      google.script.run
+        .withSuccessHandler(res => showStatus(res || 'Filter complete'))
+        .withFailureHandler(err => showStatus('Error: ' + (err.message || err), true))
+        .filterAtRiskDeals();
+    });
+
+    const modalOverlay = document.getElementById('modalOverlay');
+    const overrideInput = document.getElementById('overrideRowInput');
+    const modalOk = document.getElementById('modalOk');
+    const modalCancel = document.getElementById('modalCancel');
+
+    document.getElementById('manualOverride').addEventListener('click', () => {
+      overrideInput.value = '';
+      showStatus('');
+      modalOverlay.style.display = 'flex';
+      overrideInput.focus();
+    });
+
+    modalCancel.addEventListener('click', () => {
+      modalOverlay.style.display = 'none';
+    });
+
+    modalOk.addEventListener('click', () => {
+      const row = parseInt(overrideInput.value, 10);
+      if (row > 1) {
+        showStatus('Updating row ' + row + '...');
+        google.script.run
+          .withSuccessHandler(res => {
+            showStatus(res || ('Row ' + row + ' toggled'));
+            modalOverlay.style.display = 'none';
+          })
+          .withFailureHandler(err => {
+            showStatus('Error: ' + (err.message || err), true);
+            modalOverlay.style.display = 'none';
+          })
+          .toggleReviewed(row);
+      } else {
+        showStatus('Invalid row number.', true);
+      }
+    });
+
+    // Close modal on ESC
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modalOverlay.style.display === 'flex') {
+        modalOverlay.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
+</script>
