@@ -1,7 +1,7 @@
 var sheetService = sheetReadWriteFormatter;
 var notificationService = gmailAlertDispatcher;
 var formatDateDifference = dateDiffRangeLogger.formatDateDifference;
-var { REFUND_PERIOD_DAYS, REFUND_ALERT_THRESHOLD_DAYS, EMAIL_ON_ALERT } = APP_CONFIG;
+var { REFUND_PERIOD_DAYS, ALERT_THRESHOLD_DAYS, EMAIL_ON_ALERT } = APP_CONFIG;
 
 // provide batch methods on sheetService to avoid undefined errors
 sheetService.batchUpdateDaysLeft = function(updates) {
@@ -11,8 +11,8 @@ sheetService.batchUpdateDaysLeft = function(updates) {
 };
 sheetService.batchUpdateRefundAlertSent = function(rowIndexes) {
   rowIndexes.forEach(rowIndex => {
-    // assumes updateStatus can mark the refundAlertSent flag; adjust column/key as needed
-    sheetService.updateStatus(rowIndex, 'refundAlertSent', true);
+    // Mark alert sent using status column as a simple flag
+    sheetService.updateStatus(rowIndex, 'refundAlertSent');
   });
 };
 
@@ -36,7 +36,7 @@ function checkRefundWindow() {
       var daysLeft = REFUND_PERIOD_DAYS - daysUsed;
       daysLeftUpdates.push({ rowIndex: row.rowIndex, daysLeft: daysLeft });
 
-      var withinAlertWindow = daysLeft <= REFUND_ALERT_THRESHOLD_DAYS && daysLeft >= 0;
+      var withinAlertWindow = daysLeft <= ALERT_THRESHOLD_DAYS && daysLeft >= 0;
       var alreadyAlerted = Boolean(row.refundAlertSent);
       if (EMAIL_ON_ALERT && withinAlertWindow && !alreadyAlerted) {
         notificationService.sendEmailAlert(Object.assign({}, row, { daysLeft: daysLeft }), 'refund');

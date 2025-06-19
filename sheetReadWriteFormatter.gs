@@ -91,3 +91,12 @@ function setHeaderStyle() {
        .setFontColor('#ffffff')
        .setFontWeight('bold');
 }
+
+var sheetReadWriteFormatter = {
+  getSheet: getSheet,
+  getSheetData: getSheetData,
+  updateStatus: updateStatus,
+  updateDaysLeft: updateDaysLeft,
+  hideRows: hideRows,
+  setHeaderStyle: setHeaderStyle
+};

@@ -1,12 +1,12 @@
 
 function openSidebar() {
-  var template = HtmlService.createTemplateFromFile('Sidebar');
+  var template = HtmlService.createTemplateFromFile('darkModeSidebarManager');
   var html = template.evaluate().setTitle('LTD Lifeline');
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
 function openSettingsSidebar() {
-  var template = HtmlService.createTemplateFromFile('SettingsSidebar');
+  var template = HtmlService.createTemplateFromFile('preferencesSidebarEditor');
   var html = template.evaluate().setTitle('LTD Lifeline Settings');
   SpreadsheetApp.getUi().showSidebar(html);
 }
