@@ -82,6 +82,7 @@ function hideRows(rowsToHide) {
   sheet.hideRows(start, count);
 }
 
+
 function setHeaderStyle() {
   var sheet = getSheet();
   var lastCol = sheet.getLastColumn();
@@ -92,11 +93,35 @@ function setHeaderStyle() {
        .setFontWeight('bold');
 }
 
+function applyFancySheetStyles() {
+  var sheet = getSheet();
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (lastRow > 0) {
+    sheet.setRowHeights(1, lastRow, 60);
+  }
+  setHeaderStyle();
+  if (lastRow > 1 && lastCol > 0) {
+    var range = sheet.getRange(2, 1, lastRow - 1, lastCol);
+    var colors = [];
+    for (var r = 0; r < lastRow - 1; r++) {
+      var rowColor = (r % 2 === 0) ? '#f6f6ff' : '#ffffff';
+      var row = [];
+      for (var c = 0; c < lastCol; c++) {
+        row.push(rowColor);
+      }
+      colors.push(row);
+    }
+    range.setBackgrounds(colors);
+  }
+}
+
 var sheetReadWriteFormatter = {
   getSheet: getSheet,
   getSheetData: getSheetData,
   updateStatus: updateStatus,
   updateDaysLeft: updateDaysLeft,
   hideRows: hideRows,
-  setHeaderStyle: setHeaderStyle
+  setHeaderStyle: setHeaderStyle,
+  applyFancySheetStyles: applyFancySheetStyles
 };
