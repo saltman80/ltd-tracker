@@ -4,7 +4,7 @@ function onOpen(e) {
     .addItem(APP_CONFIG.MENU_NAME, 'openSidebar')
     .addItem('Log Date Differences', 'logDateDifferencesInRange')
     .addToUi();
-  setHeaderStyle();
+  applyFancySheetStyles();
 }
 
 function onInstall(e) {

@@ -102,12 +102,14 @@ function checkAllUrls() {
     var status;
     if (resp && typeof resp.getResponseCode === 'function') {
       var code = resp.getResponseCode();
-      status = code === 200 ? '?' : '?';
-      if (status === '?') {
+      if (code >= 200 && code < 300) {
+        status = 'UP';
+      } else {
+        status = 'DOWN';
         downed.push(deal);
       }
     } else {
-      status = '??';
+      status = 'ERROR';
     }
     updates.push({ row: deal.row, status: status });
   }
